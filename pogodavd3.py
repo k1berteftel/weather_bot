@@ -25,7 +25,7 @@ MESSAGES_FILE = "/root/pogodavd_bot/messages.json"
 
 # Глобальные словари
 USER_CITIES = {}
-TRUSTED_USERS = {'1236300146': '2', '978216734': '3'}  # Формат: {telegram_id: unique_id}
+TRUSTED_USERS = {}  # Формат: {telegram_id: unique_id}
 SESSIONS = {}  # Формат: {chat_id: {contact_id: [messages]}}
 MESSAGES = {}  # Формат: {chat_id: {contact_id: [{"message": ..., "timestamp": ...}]}}
 
@@ -83,7 +83,7 @@ def save_messages(messages):
 # Инициализация данных
 USER_CITIES = load_user_cities()
 TRUSTED_USERS = load_trusted_users()
-TRUSTED_USERS = {'1236300146': '2', '978216734': '3', '7365313189': '4'}
+TRUSTED_USERS = load_trusted_users()
 MESSAGES = load_messages()
 
 
