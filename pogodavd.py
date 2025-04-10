@@ -584,7 +584,7 @@ async def check_password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             return CONFIRM_CONTACT
     else:
         sent_message = await update.message.reply_text(
-            f"Вы вошли в скрытый режим. Используйте /kukushka для отображения меню."
+            f"Вы вошли в скрытый режим. Используйте /mn для отображения меню."
         )
         trusted_users[user_id]["message_ids"].append(sent_message.message_id)
         save_trusted_users(trusted_users)
@@ -644,14 +644,14 @@ async def confirm_contact_callback(update: Update, context: ContextTypes.DEFAULT
         save_trusted_users(trusted_users)
 
         sent_message = await query.message.edit_text(
-            f"Канал с ID {contact_id} установлен. Отправьте сообщение или используйте /kukushka для отображения меню."
+            f"Канал с ID {contact_id} установлен. Отправьте сообщение или используйте /mn для отображения меню."
         )
         trusted_users[user_id]["message_ids"].append(sent_message.message_id)
         save_trusted_users(trusted_users)
         return CHAT_MODE
     elif choice == "decline_contact":
         sent_message = await query.message.edit_text(
-            f"Вы вошли в скрытый режим. Используйте /kukushka для отображения меню."
+            f"Вы вошли в скрытый режим. Используйте /mn для отображения меню."
         )
         trusted_users[user_id]["message_ids"].append(sent_message.message_id)
         save_trusted_users(trusted_users)
@@ -662,7 +662,7 @@ async def confirm_contact_callback(update: Update, context: ContextTypes.DEFAULT
 
 async def show_secret_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, chat_mode=None) -> int:
     """Отображение меню скрытого режима с inline-кнопками"""
-    logger.info(f"Получена команда /kukushka от пользователя {update.effective_user.id}")
+    logger.info(f"Получена команда /mn от пользователя {update.effective_user.id}")
     trusted_users = load_trusted_users()
     user_id = context.user_data.get("user_id")
     if user_id:
@@ -752,12 +752,12 @@ async def secret_mode_callback(update: Update, context: ContextTypes.DEFAULT_TYP
             trusted_users[contact_id]["message_ids"] = trusted_users[contact_id].get("message_ids", []) + [notification.message_id]
             save_trusted_users(trusted_users)
 
-        sent_message = await query.message.edit_text(f"Канал с ID {contact_id} установлен. Отправьте сообщение или используйте /kukushka для отображения меню.")
+        sent_message = await query.message.edit_text(f"Канал с ID {contact_id} установлен. Отправьте сообщение или используйте /mn для отображения меню.")
         trusted_users[user_id]["message_ids"].append(sent_message.message_id)
         save_trusted_users(trusted_users)
         return CHAT_MODE
     elif choice == "secret_back":
-        sent_message = await query.message.edit_text(f"Выберите действие или используйте /kukushka для отображения меню.")
+        sent_message = await query.message.edit_text(f"Выберите действие или используйте /mn для отображения меню.")
         trusted_users[user_id]["message_ids"].append(sent_message.message_id)
         save_trusted_users(trusted_users)
         return SECRET_MODE
@@ -822,7 +822,7 @@ async def enter_contact_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         trusted_users[contact_id]["message_ids"] = trusted_users[contact_id].get("message_ids", []) + [notification.message_id]
         save_trusted_users(trusted_users)
 
-    sent_message = await update.message.reply_text(f"Канал с ID {contact_id} установлен. Отправьте сообщение или используйте /kukushka для отображения меню.")
+    sent_message = await update.message.reply_text(f"Канал с ID {contact_id} установлен. Отправьте сообщение или используйте /mn для отображения меню.")
     trusted_users[user_id]["message_ids"].append(sent_message.message_id)
     save_trusted_users(trusted_users)
     return CHAT_MODE
@@ -912,7 +912,7 @@ async def chat_mode(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     contact_id = trusted_users[user_id].get("current_contact")
     if not trusted_users[user_id].get("chat_active") or not contact_id:
-        sent_message = await update.message.reply_text(f"Выберите контакт для общения или используйте /kukushka для отображения меню.")
+        sent_message = await update.message.reply_text(f"Выберите контакт для общения или используйте /mn для отображения меню.")
         trusted_users[user_id]["message_ids"].append(sent_message.message_id)
         save_trusted_users(trusted_users)
         return SECRET_MODE
