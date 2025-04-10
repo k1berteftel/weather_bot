@@ -1,0 +1,13 @@
+{
+  "1": {
+    "telegram_id": "759418734",
+    "in_session": false,
+    "in_secret_mode": false,
+    "message_ids": [],
+    "is_new_user": false,
+    "current_contact": null,
+    "chat_active": false,
+    "has_replied": false,
+    "last_notification_id": 4222
+  }
+}
