@@ -609,12 +609,12 @@ async def confirm_contact_callback(update: Update, context: ContextTypes.DEFAULT
                 sent_message = await context.bot.send_photo(
                     chat_id=update.callback_query.message.chat.id,
                     photo=msg["photo_id"],
-                    caption=f"ID {msg['sender_id']}: [Фото]"
+                    caption=f"ID {msg['sender_id']} и именем {msg['name']}: [Фото]"
                 )
             else:
                 sent_message = await context.bot.send_message(
                     chat_id=update.callback_query.message.chat.id,
-                    text=f"ID {msg['sender_id']}: {msg['message']}"
+                    text=f"ID {msg['sender_id']} и именем {msg['name']}: {msg['message']}"
                 )
             trusted_users[user_id]["message_ids"].append(sent_message.message_id)
 
@@ -937,9 +937,11 @@ async def chat_mode(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         messages[contact_id] = []
 
     if not trusted_users[contact_id].get("chat_active"):
+        name = trusted_users[user_id].get("name")
         if message_text:
             messages[contact_id].append({
                 "sender_id": user_id,
+                "name": name,
                 "message": message_text,
                 "is_photo": False,
                 "photo_id": None,
@@ -949,6 +951,7 @@ async def chat_mode(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         elif photo:
             messages[contact_id].append({
                 "sender_id": user_id,
+                "name": name,
                 "message": "[Фото]",
                 "is_photo": True,
                 "photo_id": photo.file_id,
@@ -968,11 +971,12 @@ async def chat_mode(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     # Если собеседник в скрытом режиме, отправляем сообщение
     if trusted_users[contact_id].get("in_secret_mode", False):
+        name = trusted_users[user_id].get("name")
         if message_text:
-            sent_message = await context.bot.send_message(chat_id=contact_telegram_id, text=f"ID {user_id}: {message_text}")
+            sent_message = await context.bot.send_message(chat_id=contact_telegram_id, text=f"ID {user_id} и именем {name}: {message_text}")
             trusted_users[contact_id]["message_ids"].append(sent_message.message_id)
         elif photo:
-            sent_message = await context.bot.send_photo(chat_id=contact_telegram_id, photo=photo.file_id, caption=f"ID {user_id}: [Фото]")
+            sent_message = await context.bot.send_photo(chat_id=contact_telegram_id, photo=photo.file_id, caption=f"ID {user_id} и именем {name}: [Фото]")
             trusted_users[contact_id]["message_ids"].append(sent_message.message_id)
         save_trusted_users(trusted_users)
 
@@ -1306,6 +1310,7 @@ async def debug_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if 'state' not in context.user_data:
         await update.message.reply_text("ℹ️ Пожалуйста, начните диалог с помощью команды, например, /addcity или /forecast.")
         await set_right_button(update.message, context)
+
 
 # ===== ЗАПУСК БОТА =====
 def main():

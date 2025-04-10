@@ -1,6 +1,7 @@
 {
   "1": {
     "telegram_id": "7745077531",
+    "name": "Админ 2",
     "in_session": true,
     "in_secret_mode": true,
     "message_ids": [],
@@ -12,6 +13,7 @@
   },
   "2": {
     "telegram_id": "7750281774",
+    "name": "Админ 1",
     "in_session": true,
     "in_secret_mode": true,
     "message_ids": [],
