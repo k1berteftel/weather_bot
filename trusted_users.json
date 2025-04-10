@@ -1,8 +1,19 @@
 {
   "1": {
     "telegram_id": "7745077531",
-    "in_session": false,
-    "in_secret_mode": false,
+    "in_session": true,
+    "in_secret_mode": true,
+    "message_ids": [],
+    "is_new_user": false,
+    "current_contact": null,
+    "chat_active": false,
+    "has_replied": false,
+    "last_notification_id": 4222
+  },
+  "2": {
+    "telegram_id": "7750281774",
+    "in_session": true,
+    "in_secret_mode": true,
     "message_ids": [],
     "is_new_user": false,
     "current_contact": null,

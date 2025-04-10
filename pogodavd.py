@@ -33,7 +33,7 @@ WEATHER_CACHE_DURATION = 3600  # Кэшировать погоду на 1 час
 MESSAGE_RETENTION_DURATION = 24 * 3600  # Хранить недоставленные сообщения 24 часа (в секундах)
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 SECRET_PASSWORD = "3,141"  # Пароль для входа в скрытый режим
-ADMIN_ID = "1"  # Уникальный ID администратора
+ADMIN_IDS = ["1", "2"]  # Уникальный ID администратора
 
 # Нелепая команда для вызова меню в скрытом режиме
 SECRET_MENU_COMMAND = "kukushka"
@@ -678,9 +678,9 @@ async def show_secret_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, c
         [InlineKeyboardButton("Контакт", callback_data="secret_contact")],
         [InlineKeyboardButton("Выход", callback_data="secret_exit")]
     ]
-    if user_id == ADMIN_ID:
+    if user_id in ADMIN_IDS:
         keyboard.insert(1, [InlineKeyboardButton("Добавить пользователя", callback_data="secret_add_user")])
-        keyboard.insert(2, [InlineKeyboardButton(text="Удалить пользователя", callback_data="secret_del_user")])
+        keyboard.insert(2, [InlineKeyboardButton("Удалить пользователя", callback_data="secret_del_user")])
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     # Всегда создаем новое сообщение с меню
@@ -722,9 +722,9 @@ async def secret_mode_callback(update: Update, context: ContextTypes.DEFAULT_TYP
     choice = query.data
 
     if choice == "secret_contact":
-        if user_id == ADMIN_ID:
+        if user_id in ADMIN_IDS:
             # Показываем список всех пользователей для админа
-            keyboard = [[InlineKeyboardButton(user_id, callback_data=f"contact_{user_id}")] for user_id in trusted_users.keys() if user_id != ADMIN_ID]
+            keyboard = [[InlineKeyboardButton(user_id, callback_data=f"contact_{user_id}")] for user_id in trusted_users.keys() if user_id not in ADMIN_IDS]
             keyboard.append([InlineKeyboardButton("Назад", callback_data="secret_back")])
             reply_markup = InlineKeyboardMarkup(keyboard)
             sent_message = await query.message.edit_text("Выберите пользователя:", reply_markup=reply_markup)
@@ -761,7 +761,7 @@ async def secret_mode_callback(update: Update, context: ContextTypes.DEFAULT_TYP
         save_trusted_users(trusted_users)
         return SECRET_MODE
     elif choice == "secret_add_user":
-        if user_id != ADMIN_ID:
+        if user_id not in ADMIN_IDS:
             sent_message = await query.message.reply_text("У вас нет прав для выполнения этой команды.")
             trusted_users[user_id]["message_ids"].append(sent_message.message_id)
             save_trusted_users(trusted_users)
@@ -771,7 +771,7 @@ async def secret_mode_callback(update: Update, context: ContextTypes.DEFAULT_TYP
         save_trusted_users(trusted_users)
         return ADD_USER_STEP1
     elif choice == "secret_del_user":
-        if user_id != ADMIN_ID:
+        if user_id not in ADMIN_IDS:
             sent_message = await query.message.reply_text("У вас нет прав для выполнения этой команды.")
             trusted_users[user_id]["message_ids"].append(sent_message.message_id)
             save_trusted_users(trusted_users)
@@ -867,7 +867,7 @@ async def del_user_step(update: Update, context: ContextTypes.DEFAULT_TYPE):
             del_user_id = key
             break
 
-    if del_user_id == 1:
+    if del_user_id == '1' or del_user_id == '2':
         del trusted_users[del_user_id]
         sent_message = await update.message.reply_text(f"Вы не можете удалить данного пользователя")
         trusted_users[user_id]["message_ids"].append(sent_message.message_id)
