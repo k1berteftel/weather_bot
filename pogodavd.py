@@ -862,12 +862,16 @@ async def del_user_step(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = update.message.text.strip()
 
     del_user_id = None
-    for key, value in trusted_users:
+    for key, value in trusted_users.items():
         if telegram_id == value.get('telegram_id'):
             del_user_id = key
             break
 
-    if del_user_id:
+    if del_user_id == 1:
+        del trusted_users[del_user_id]
+        sent_message = await update.message.reply_text(f"Вы не можете удалить данного пользователя")
+        trusted_users[user_id]["message_ids"].append(sent_message.message_id)
+    elif del_user_id:
         del trusted_users[del_user_id]
         sent_message = await update.message.reply_text(f"Пользователь с ID {del_user_id} был успешно удален")
         trusted_users[user_id]["message_ids"].append(sent_message.message_id)
@@ -1291,7 +1295,7 @@ def main():
     """Основная функция запуска"""
     logger.info("Запуск бота PogodaVD")
     # Создаем приложение
-    application = Application.builder().token("").build()
+    application = Application.builder().token("7411644273:AAFET7Xz-w9iIi2D53XxPDlWWdluCKPe58s").build()
 
     # Обработчик ошибок
     #application.add_error_handler(error_handler)
