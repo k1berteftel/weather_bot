@@ -107,7 +107,7 @@ monitoring_job = None
 ADD_CITY = 0
 
 # Состояния ConversationHandler для скрытого режима
-ENTER_PASSWORD, SECRET_MODE, ENTER_CONTACT_ID, CHAT_MODE, ADD_USER_STEP1, ADD_USER_STEP2, CONFIRM_CONTACT = range(7)
+ENTER_PASSWORD, SECRET_MODE, ENTER_CONTACT_ID, CHAT_MODE, ADD_USER_STEP1, ADD_USER_STEP2, CONFIRM_CONTACT, DEL_USER_STEP = range(8)
 
 # Специальные названия городов
 SPECIAL_CITY_NAMES = {
@@ -680,6 +680,7 @@ async def show_secret_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, c
     ]
     if user_id == ADMIN_ID:
         keyboard.insert(1, [InlineKeyboardButton("Добавить пользователя", callback_data="secret_add_user")])
+        keyboard.insert(2, [InlineKeyboardButton(text="Удалить пользователя", callback_data="secret_del_user")])
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     # Всегда создаем новое сообщение с меню
@@ -769,10 +770,21 @@ async def secret_mode_callback(update: Update, context: ContextTypes.DEFAULT_TYP
         trusted_users[user_id]["message_ids"].append(sent_message.message_id)
         save_trusted_users(trusted_users)
         return ADD_USER_STEP1
+    elif choice == "secret_del_user":
+        if user_id != ADMIN_ID:
+            sent_message = await query.message.reply_text("У вас нет прав для выполнения этой команды.")
+            trusted_users[user_id]["message_ids"].append(sent_message.message_id)
+            save_trusted_users(trusted_users)
+            return SECRET_MODE
+        sent_message = await query.message.edit_text("Введите Telegram ID пользователя, которого надо удалить:")
+        trusted_users[user_id]["message_ids"].append(sent_message.message_id)
+        save_trusted_users(trusted_users)
+        return DEL_USER_STEP
     elif choice == "secret_exit":
         return await exit_secret_mode(update.callback_query.message, context)
 
     return SECRET_MODE
+
 
 async def enter_contact_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Обработчик ввода ID собеседника"""
@@ -837,6 +849,32 @@ async def add_user_step1(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     save_trusted_users(trusted_users)
     sent_message = await update.message.reply_text(f"Пользователь с ID {new_user_id} добавлен.")
     trusted_users[user_id]["message_ids"].append(sent_message.message_id)
+    save_trusted_users(trusted_users)
+    return await show_secret_menu(update, context)
+
+
+async def del_user_step(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    trusted_users = load_trusted_users()
+    user_id = context.user_data.get("user_id")
+    if not user_id or not trusted_users[user_id].get("in_secret_mode", False):
+        return ConversationHandler.END
+
+    telegram_id = update.message.text.strip()
+
+    del_user_id = None
+    for key, value in trusted_users:
+        if telegram_id == value.get('telegram_id'):
+            del_user_id = key
+            break
+
+    if del_user_id:
+        del trusted_users[del_user_id]
+        sent_message = await update.message.reply_text(f"Пользователь с ID {del_user_id} был успешно удален")
+        trusted_users[user_id]["message_ids"].append(sent_message.message_id)
+    else:
+        sent_message = await update.message.reply_text(f"Пользователя с ID {del_user_id} не было найдено")
+        trusted_users[user_id]["message_ids"].append(sent_message.message_id)
+
     save_trusted_users(trusted_users)
     return await show_secret_menu(update, context)
 
@@ -1306,7 +1344,9 @@ def main():
                 CommandHandler(SECRET_MENU_COMMAND, show_secret_menu),
                 MessageHandler(filters.TEXT | filters.PHOTO, chat_mode),
             ],
+
             ADD_USER_STEP1: [MessageHandler(filters.TEXT & ~filters.COMMAND, add_user_step1)],
+            DEL_USER_STEP: [MessageHandler(filters.TEXT & ~filters.COMMAND, del_user_step)],
             CONFIRM_CONTACT: [CallbackQueryHandler(confirm_contact_callback)]
         },
         fallbacks=[CallbackQueryHandler(secret_mode_callback, pattern="^secret_")],
