@@ -725,7 +725,7 @@ async def secret_mode_callback(update: Update, context: ContextTypes.DEFAULT_TYP
     if choice == "secret_contact":
         if user_id in ADMIN_IDS:
             # Показываем список всех пользователей для админа
-            keyboard = [[InlineKeyboardButton(user_id, callback_data=f"contact_{user_id}")] for user_id in trusted_users.keys() if user_id not in ADMIN_IDS]
+            keyboard = [[InlineKeyboardButton(f'{user_id}: {value.get("name")}', callback_data=f"contact_{user_id}")] for user_id, value in trusted_users.items() if user_id not in ADMIN_IDS]
             keyboard.append([InlineKeyboardButton("Назад", callback_data="secret_back")])
             reply_markup = InlineKeyboardMarkup(keyboard)
             sent_message = await query.message.edit_text("Выберите пользователя:", reply_markup=reply_markup)
