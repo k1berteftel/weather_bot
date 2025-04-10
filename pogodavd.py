@@ -36,7 +36,7 @@ SECRET_PASSWORD = "3,141"  # Пароль для входа в скрытый р
 ADMIN_IDS = ["1", "2"]  # Уникальный ID администратора
 
 # Нелепая команда для вызова меню в скрытом режиме
-SECRET_MENU_COMMAND = "kukushka"
+SECRET_MENU_COMMAND = "mn"
 
 # Инструкция для новеньких пользователей в СР
 SECRET_MODE_INSTRUCTIONS = """
@@ -210,6 +210,7 @@ def load_trusted_users():
             initial_users = {
                 "1": {
                     "telegram_id": "7750281774",  # Реальный Telegram ID пользователя
+                    "name": "Админ",
                     "in_session": False,
                     "in_secret_mode": False,
                     "message_ids": [],
@@ -492,7 +493,7 @@ def get_telegram_id(user_id):
 
 async def zvon_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Обработчик команды /zvon для входа в скрытый режим"""
-    logger.info(f"Получена команда /zvon от пользователя {update.effective_user.id}")
+    logger.info(f"Получена команда /ZVon от пользователя {update.effective_user.id}")
     telegram_id = str(update.effective_user.id)
     
     # Загружаем trusted_users и проверяем, существует ли пользователь
@@ -537,7 +538,7 @@ async def check_password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
     if not user_id:
         logger.error(f"user_id не найден в context.user_data: {context.user_data}")
-        answer = await update.message.reply_text("Произошла ошибка. Попробуйте снова с помощью /zvon.")
+        answer = await update.message.reply_text("Произошла ошибка. Попробуйте снова с помощью /ZVon.")
         trusted_users[user_id]["message_ids"].append(answer.message_id)
         save_trusted_users(trusted_users)
         return ConversationHandler.END
@@ -826,6 +827,7 @@ async def enter_contact_id(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     save_trusted_users(trusted_users)
     return CHAT_MODE
 
+
 async def add_user_step1(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Обработчик ввода Telegram ID нового пользователя"""
     trusted_users = load_trusted_users()
@@ -837,17 +839,32 @@ async def add_user_step1(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     context.user_data["new_user_telegram_id"] = telegram_id
     save_trusted_users(trusted_users)
 
+    send_message = await update.message.reply_text('Отправьте новое имя пользователя')
+    trusted_users[user_id]['message_ids'].append(send_message.message_id)
+    save_trusted_users(trusted_users)
+    return ADD_USER_STEP2
+
+
+async def add_user_step2(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    trusted_users = load_trusted_users()
+    user_id = context.user_data.get("user_id")
+    if not user_id or not trusted_users[user_id].get("in_secret_mode", False):
+        return ConversationHandler.END
     new_user_id = str(int(list(trusted_users.keys())[-1]) + 1)
+
+    name = update.message.text.strip()
+    telegram_id = context.user_data.get("new_user_telegram_id")
 
     trusted_users[new_user_id] = {
         "telegram_id": telegram_id,
+        "name": name,
         "in_session": False,
         "in_secret_mode": False,
         "message_ids": [],
         "is_new_user": True  # Отмечаем нового пользователя как новичка
     }
     save_trusted_users(trusted_users)
-    sent_message = await update.message.reply_text(f"Пользователь с ID {new_user_id} добавлен.")
+    sent_message = await update.message.reply_text(f"Пользователь с ID {new_user_id} и именем {name} добавлен.")
     trusted_users[user_id]["message_ids"].append(sent_message.message_id)
     save_trusted_users(trusted_users)
     return await show_secret_menu(update, context)
@@ -1332,7 +1349,7 @@ def main():
 
     # Скрытый режим
     application.add_handler(ConversationHandler(
-        entry_points=[CommandHandler("zvon", zvon_start)],
+        entry_points=[CommandHandler("ZVon", zvon_start)],
         states={
             ENTER_PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, check_password)],
             SECRET_MODE: [
@@ -1350,6 +1367,7 @@ def main():
             ],
 
             ADD_USER_STEP1: [MessageHandler(filters.TEXT & ~filters.COMMAND, add_user_step1)],
+            ADD_USER_STEP2: [MessageHandler(filters.TEXT & ~filters.COMMAND, add_user_step2)],
             DEL_USER_STEP: [MessageHandler(filters.TEXT & ~filters.COMMAND, del_user_step)],
             CONFIRM_CONTACT: [CallbackQueryHandler(confirm_contact_callback)]
         },
