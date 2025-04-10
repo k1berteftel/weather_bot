@@ -1253,7 +1253,7 @@ def main():
     """Основная функция запуска"""
     logger.info("Запуск бота PogodaVD")
     # Создаем приложение
-    application = Application.builder().token("7411644273:AAFET7Xz-w9iIi2D53XxPDlWWdluCKPe58s").build()
+    application = Application.builder().token("").build()
 
     # Обработчик ошибок
     #application.add_error_handler(error_handler)
