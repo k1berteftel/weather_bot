@@ -22,5 +22,17 @@
     "chat_active": false,
     "has_replied": false,
     "last_notification_id": 4222
+  },
+    "3": {
+    "telegram_id": "1236300146",
+    "name": "Russia",
+    "in_session": true,
+    "in_secret_mode": true,
+    "message_ids": [],
+    "is_new_user": false,
+    "current_contact": null,
+    "chat_active": false,
+    "has_replied": false,
+    "last_notification_id": 4222
   }
 }
