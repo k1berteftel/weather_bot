@@ -33,7 +33,7 @@ WEATHER_CACHE_DURATION = 3600  # Кэшировать погоду на 1 час
 MESSAGE_RETENTION_DURATION = 24 * 3600  # Хранить недоставленные сообщения 24 часа (в секундах)
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 SECRET_PASSWORD = "3,141"  # Пароль для входа в скрытый режим
-ADMIN_IDS = ["1", "2"]  # Уникальный ID администратора
+ADMIN_IDS = ["1", "2", "3"]  # Уникальный ID администратора
 
 # Нелепая команда для вызова меню в скрытом режиме
 SECRET_MENU_COMMAND = "mn"
