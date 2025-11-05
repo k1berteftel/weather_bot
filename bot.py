@@ -22,8 +22,24 @@ from dialogs import get_dialogs
 from middlewares import TransferObjectsMiddleware
 
 
-timezone = pytz.timezone('Europe/Moscow')
-datetime.datetime.now(timezone)
+MOSCOW_TZ = pytz.timezone('Europe/Moscow')
+
+
+def set_moscow_timezone():
+    """Устанавливает московский часовой пояс как системный по умолчанию"""
+    os.environ['TZ'] = 'Europe/Moscow'
+
+
+def get_moscow_time():
+    """Возвращает текущее время в московском часовом поясе"""
+    return datetime.datetime.now(MOSCOW_TZ)
+
+
+set_moscow_timezone()
+
+datetime.datetime.now = lambda: get_moscow_time()
+datetime.datetime.utcnow = lambda: get_moscow_time().astimezone(pytz.UTC)
+
 
 module_path = inspect.getfile(inspect.currentframe())
 module_dir = os.path.realpath(os.path.dirname(module_path))
