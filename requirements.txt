@@ -1,0 +1,12 @@
+aiogram
+aiogram_dialog
+APScheduler
+asyncpg
+environs
+ormsgpack
+greenlet
+pydantic
+SQLAlchemy
+pytz
+openai
+
