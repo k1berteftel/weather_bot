@@ -59,6 +59,8 @@ class MoscowDateTime(datetime.datetime):
 # Подменяем стандартный datetime на наш кастомный
 datetime.datetime = MoscowDateTime
 
+print(datetime.datetime.now())
+
 
 module_path = inspect.getfile(inspect.currentframe())
 module_dir = os.path.realpath(os.path.dirname(module_path))
