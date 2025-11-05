@@ -21,24 +21,43 @@ from handlers.user_handlers import user_router
 from dialogs import get_dialogs
 from middlewares import TransferObjectsMiddleware
 
-
 MOSCOW_TZ = pytz.timezone('Europe/Moscow')
 
-
-def set_moscow_timezone():
-    """Устанавливает московский часовой пояс как системный по умолчанию"""
-    os.environ['TZ'] = 'Europe/Moscow'
-
-
-def get_moscow_time():
-    """Возвращает текущее время в московском часовом поясе"""
-    return datetime.datetime.now(MOSCOW_TZ)
+# Сохраняем оригинальные функции datetime
+_original_datetime_now = datetime.datetime.now
+_original_datetime_utcnow = datetime.datetime.utcnow
+_original_datetime_fromtimestamp = datetime.datetime.fromtimestamp
+_original_datetime_combine = datetime.datetime.combine
 
 
-set_moscow_timezone()
+# Переопределяем класс datetime для подмены методов
+class MoscowDateTime(datetime.datetime):
+    @classmethod
+    def now(cls, tz=None):
+        # Игнорируем переданный tz и всегда используем московский
+        return _original_datetime_now(MOSCOW_TZ)
 
-datetime.datetime.now = lambda: get_moscow_time()
-datetime.datetime.utcnow = lambda: get_moscow_time().astimezone(pytz.UTC)
+    @classmethod
+    def utcnow(cls):
+        # Возвращаем московское время вместо UTC
+        return _original_datetime_now(MOSCOW_TZ)
+
+    @classmethod
+    def fromtimestamp(cls, timestamp, tz=None):
+        # Игнорируем переданный tz и всегда используем московский
+        return _original_datetime_fromtimestamp(timestamp, MOSCOW_TZ)
+
+    @classmethod
+    def combine(cls, date, time, tzinfo=None):
+        # Создаем naive datetime и затем локализуем в московский пояс
+        dt = _original_datetime_combine(date, time, tzinfo)
+        if dt.tzinfo is None:
+            return MOSCOW_TZ.localize(dt)
+        return dt.astimezone(MOSCOW_TZ)
+
+
+# Подменяем стандартный datetime на наш кастомный
+datetime.datetime = MoscowDateTime
 
 
 module_path = inspect.getfile(inspect.currentframe())
