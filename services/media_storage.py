@@ -41,6 +41,10 @@ class MediaStorage():
                 id='update_media_process'
             )
 
+    async def update_media(self):
+        self.set_current_media(None)
+        await self.configurate_media()
+
     def set_current_media(self, media_id: int | None):
         self._current_media = media_id
 
