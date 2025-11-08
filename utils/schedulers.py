@@ -1,5 +1,6 @@
 import asyncio
 import os
+import logging
 from datetime import datetime, timedelta
 
 from aiogram import Bot
@@ -9,6 +10,9 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from utils.ai_utils import get_answer_by_prompt
 from database.action_data_class import DataInteraction
+
+
+logger = logging.getLogger(__name__)
 
 
 async def update_storage_media(storage, session: DataInteraction):
@@ -38,9 +42,11 @@ async def create_channel_post(channel_id: int, user_id: int, bot: Bot, session: 
         try:
             text = await get_answer_by_prompt(channel.city)
             break
-        except Exception:
+        except Exception as err:
+            logger.warning(f'deepseek generation error: {err}')
             await asyncio.sleep(5)
             counter += 1
+
     text = f'<b>Доброе утро, {channel.city}!</b>\n\n' + text
     media_id = media_storage.get_current_media()
     if media_id:
@@ -89,5 +95,17 @@ async def create_channel_post(channel_id: int, user_id: int, bot: Bot, session: 
                 await media_storage.update_media()
                 media_id = media_storage.get_current_media()
                 counter += 1
+    else:
+        try:
+            await bot.send_message(
+                chat_id=channel.channel_id,
+                text=text
+            )
+        except Exception:
+            await bot.send_message(
+                chat_id=user_id,
+                text=f'Во время выкладки поста в канал {channel.title} произошла какая-то ошибка, '
+                     f'пожалуйста выложите пост вручную'
+            )
 
 

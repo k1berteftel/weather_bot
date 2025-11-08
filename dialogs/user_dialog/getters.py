@@ -25,7 +25,7 @@ async def channels_getter(event_from_user: User, dialog_manager: DialogManager, 
         text = 'Ваши каналы:\n'
         counter = 1
         for channel in channels:
-            text += f'({counter}) {channel.title} - {channel.city} ({channel.time.strftime("%H:%M")})'
+            text += f'({counter}) {channel.title} - {channel.city} ({channel.time.strftime("%H:%M")})\n'
             counter += 1
     else:
         text = 'У вас не добавлено каналов'
@@ -250,7 +250,7 @@ async def add_media(clb: CallbackQuery, widget: Button, dialog_manager: DialogMa
     wait_msg = await clb.message.answer('Начался процесс сохранения медиа, пожалуйста ожидайте')
     for media in medias:
         path = await upload_media(media, clb.bot)
-        type = 'photo' if isinstance(media, PhotoSize) else 'video' if isinstance(media, Video) else 'animation'
+        type = 'photo' if isinstance(media, PhotoSize) else ('video' if isinstance(media, Video) else 'animation')
         await session.add_media(path, type)
     try:
         await wait_msg.delete()

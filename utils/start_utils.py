@@ -14,7 +14,7 @@ async def start_schedulers(bot: Bot, session: DataInteraction, scheduler: AsyncI
         scheduler.add_job(
             create_channel_post,
             'interval',
-            args=[channel.channel_id, 1048917973, bot, session, media_storage],
+            args=[channel.channel_id, 8005178596, bot, session, media_storage],
             id=job_id,
             next_run_time=datetime.combine(date.today(), channel.time),
             hours=24
